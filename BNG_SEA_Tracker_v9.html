@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>blackNgreen — SEA KPI Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#e8e6e0;--surface:#f4f2ec;--card:#ffffff;
+  --border:rgba(60,40,20,.10);--border-md:rgba(60,40,20,.18);
+  --t1:#1c1510;--t2:#5a4a38;--t3:#9a8878;--t4:#c4b8aa;
+  --green:#1a6b2a;--green-bg:#eaf3ec;
+  --red:#8b2020;--red-bg:#f9eaea;
+  --amber:#7a4a00;--amber-bg:#faf2e4;
+  --teal:#0c5040;--teal-bg:#e4f0ec;
+  --gray:#4a4a44;--gray-bg:#edece8;
+  --r:8px;--rl:14px;
+  --sh:0 1px 4px rgba(40,25,10,.07),0 1px 2px rgba(40,25,10,.04);
+  --shm:0 4px 18px rgba(40,25,10,.10);
+  --shl:0 12px 40px rgba(40,25,10,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t1);font-size:12px;min-height:100vh;}
+.app{max-width:1480px;margin:0 auto;padding:32px 32px 60px;}
+
+@keyframes slideDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes rowIn{from{opacity:0;transform:translateX(-4px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(139,32,32,.35)}50%{box-shadow:0 0 0 5px rgba(139,32,32,0)}}
+
+/* HEADER */
+.header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:14px;animation:slideDown .42s ease both;}
+.header-left{display:flex;flex-direction:column;gap:3px;}
+.logo{height:28px;width:auto;object-fit:contain;margin-bottom:6px;display:block;}
+.page-title{font-size:26px;font-weight:800;letter-spacing:-.8px;color:var(--t1);line-height:1.15;}
+.page-sub{font-size:11px;color:var(--t3);font-weight:400;}
+.header-actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding-top:4px;}
+
+/* BUTTONS */
+.btn{padding:8px 18px;border-radius:var(--r);border:1px solid var(--border-md);background:var(--card);color:var(--t2);font-size:11px;font-family:'Inter',sans-serif;cursor:pointer;transition:all .18s;font-weight:600;letter-spacing:.01em;}
+.btn:hover{background:var(--surface);color:var(--t1);transform:translateY(-1px);box-shadow:var(--sh);}
+.btn:active{transform:scale(.98);}
+.btn.filled{background:#d4c8b8;color:#2e2218;border-color:rgba(60,40,20,.22);box-shadow:0 2px 6px rgba(28,21,16,.12);}
+.btn.filled:hover{background:#c8bbaa;color:#1c1510;box-shadow:0 4px 12px rgba(28,21,16,.18);transform:translateY(-1px);}
+.btn.filled.av{background:#1c1510;color:#fff;border-color:#1c1510;box-shadow:0 2px 8px rgba(28,21,16,.25);}
+.btn.filled.av:hover{background:#2e2218;box-shadow:0 4px 14px rgba(28,21,16,.32);}
+.btn.green-btn{background:#c8e6ce;color:#1a6b2a;border-color:rgba(26,107,42,.25);box-shadow:0 2px 6px rgba(26,107,42,.12);font-weight:700;}
+.btn.green-btn:hover{background:#b8dcbf;color:#155a22;box-shadow:0 4px 12px rgba(26,107,42,.2);transform:translateY(-2px);}
+.btn.ghost{background:transparent;border:1px solid var(--border-md);}
+.btn.ghost:hover{background:var(--surface);}
+.btn.sm{padding:4px 10px;font-size:10px;}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:22px;}
+.metric{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px 22px;transition:transform .2s,box-shadow .2s;box-shadow:var(--sh);}
+.metric:nth-child(1){animation:fadeUp .4s .04s ease both;}
+.metric:nth-child(2){animation:fadeUp .4s .08s ease both;}
+.metric:nth-child(3){animation:fadeUp .4s .12s ease both;}
+.metric:nth-child(4){animation:fadeUp .4s .16s ease both;}
+.metric:hover{transform:translateY(-3px);box-shadow:var(--shm);}
+.metric-label{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;}
+.metric-num{font-size:40px;font-weight:800;letter-spacing:-2px;line-height:1;}
+.metric-num.c-black{color:var(--t1);}
+.metric-num.c-red{color:var(--red);}
+.metric-num.c-amber{color:var(--amber);}
+.metric-num.c-green{color:var(--green);}
+
+/* LEGEND */
+.legend{display:flex;align-items:center;gap:16px;margin-bottom:12px;flex-wrap:wrap;}
+.leg{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t2);font-weight:500;}
+.sdot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.stale-x{display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;border-radius:50%;background:var(--red-bg);color:var(--red);font-size:8px;font-weight:800;flex-shrink:0;animation:pulse 2s infinite;}
+.leg-hint{font-size:10px;color:var(--t4);font-style:italic;}
+
+/* TABS */
+.tab-bar{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:14px;}
+.tab{padding:5px 14px;border-radius:99px;border:1px solid transparent;background:none;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;color:var(--t3);cursor:pointer;transition:all .16s;white-space:nowrap;display:inline-flex;align-items:center;gap:5px;}
+.tab:hover{background:var(--surface);color:var(--t2);border-color:var(--border-md);}
+.tab.active{background:var(--t1);color:#fff;border-color:var(--t1);box-shadow:0 2px 6px rgba(28,21,16,.2);}
+.tab-n{font-size:9px;font-weight:700;opacity:.75;}
+
+/* CONTROLS */
+.controls{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap;}
+.search-inp{flex:1;min-width:180px;padding:8px 14px;border-radius:var(--r);border:1px solid var(--border-md);font-size:11px;font-family:'Inter',sans-serif;background:var(--card);outline:none;color:var(--t1);transition:border-color .16s,box-shadow .16s;}
+.search-inp::placeholder{color:var(--t4);}
+.search-inp:focus{border-color:var(--t2);box-shadow:0 0 0 3px rgba(90,74,56,.1);}
+.ctrl-sel{padding:8px 12px;border-radius:var(--r);border:1px solid var(--border-md);font-size:11px;font-family:'Inter',sans-serif;background:var(--card);outline:none;color:var(--t2);font-weight:500;cursor:pointer;}
+.ctrl-sel:focus{border-color:var(--t2);}
+
+/* TABLE */
+.tcard{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh);animation:fadeUp .4s .2s ease both;}
+.tscroll{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;table-layout:fixed;}
+th{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.09em;padding:10px 14px;border-bottom:1px solid var(--border);text-align:left;background:var(--card);white-space:nowrap;}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;transition:background .1s;}
+
+/* KEY FIX: Latest update column — full text, wraps properly */
+td.col-update{
+  white-space:normal;
+  word-break:break-word;
+  line-height:1.55;
+  font-size:11px;
+  color:var(--t3);
+  vertical-align:top;
+  padding-top:11px;
+}
+
+/* Other columns stay clipped */
+td.col-clip{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;}
+td.col-norm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;}
+td.col-task{white-space:normal;line-height:1.4;vertical-align:top;padding-top:11px;}
+
+tr:last-child td{border-bottom:none;}
+tr.shdr td{background:var(--surface);font-size:9px;font-weight:800;color:var(--t2);letter-spacing:.1em;text-transform:uppercase;padding:6px 14px;border-bottom:1px solid var(--border);border-top:1px solid var(--border);}
+tr.shdr:first-child td{border-top:none;}
+tr.trow{animation:rowIn .26s ease both;}
+tr.trow:hover td{background:#faf9f5;}
+tr.stale-row td{background:#fdf9f8;}
+
+tr.trow:nth-child(2){animation-delay:.03s}tr.trow:nth-child(3){animation-delay:.06s}
+tr.trow:nth-child(4){animation-delay:.09s}tr.trow:nth-child(5){animation-delay:.12s}
+tr.trow:nth-child(6){animation-delay:.15s}tr.trow:nth-child(7){animation-delay:.18s}
+tr.trow:nth-child(8){animation-delay:.21s}tr.trow:nth-child(9){animation-delay:.24s}
+tr.trow:nth-child(10){animation-delay:.27s}tr.trow:nth-child(11){animation-delay:.30s}
+tr.trow:nth-child(12){animation-delay:.33s}
+
+/* STATUS DROPDOWN */
+.ssel{border:1px solid rgba(60,40,20,.14);border-radius:99px;font-size:10px;font-weight:600;padding:3px 8px;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;font-family:'Inter',sans-serif;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='7' height='4' viewBox='0 0 7 4'%3E%3Cpath d='M0 0l3.5 4 3.5-4z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 7px center;padding-right:20px;transition:filter .14s;}
+.ssel:hover{filter:brightness(.93);}
+.ssel.on-track{background-color:var(--green-bg);color:var(--green);border-color:rgba(26,107,42,.2);}
+.ssel.hold{background-color:var(--gray-bg);color:var(--gray);border-color:rgba(74,74,68,.2);}
+.ssel.completed{background-color:var(--teal-bg);color:var(--teal);border-color:rgba(12,80,64,.2);}
+.ssel option{background:#fff;color:#111;}
+
+/* BADGES */
+.badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px;white-space:nowrap;}
+.badge.on-track{background:var(--green-bg);color:var(--green);}
+.badge.hold{background:var(--gray-bg);color:var(--gray);}
+.badge.completed{background:var(--teal-bg);color:var(--teal);}
+
+/* INLINE EDIT */
+.einput{border:none;background:transparent;font-size:11px;color:var(--t1);width:100%;outline:none;padding:2px 4px;border-radius:4px;cursor:pointer;font-family:'Inter',sans-serif;transition:background .13s;}
+.einput:hover{background:var(--surface);}
+.einput:focus{background:var(--surface);border:1px solid var(--border-md);cursor:text;}
+
+/* CAL BUTTON */
+.cbtn{background:transparent;border:none;font-size:11px;color:var(--t1);cursor:pointer;padding:2px 4px;border-radius:4px;width:100%;text-align:left;font-family:'Inter',sans-serif;transition:background .13s;}
+.cbtn:hover{background:var(--surface);}
+.cbtn.empty{color:var(--t4);}
+
+/* DAYS CHIP */
+.dchip{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px;}
+
+/* UPDATE CELL (today's update) */
+.ucell{cursor:pointer;color:var(--t4);font-size:11px;transition:color .13s;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ucell.hv{color:var(--t2);}
+.ucell:hover{color:var(--t1);}
+
+/* AVATAR */
+.av-chip{width:20px;height:20px;border-radius:50%;font-size:8px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+
+/* CALENDAR */
+.cpop{display:none;position:fixed;z-index:9999;background:var(--card);border:1px solid var(--border-md);border-radius:12px;padding:13px;width:236px;box-shadow:var(--shl);animation:scaleIn .14s ease;}
+.cpop.open{display:block;}
+.chead{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.cnav{background:var(--surface);border:1px solid var(--border);border-radius:5px;cursor:pointer;font-size:14px;color:var(--t2);padding:2px 8px;transition:all .13s;}
+.cnav:hover{background:var(--t1);color:#fff;border-color:var(--t1);}
+.cmlbl{font-size:12px;font-weight:700;color:var(--t1);}
+.cgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cdow{font-size:8px;text-align:center;color:var(--t4);padding:2px 0;font-weight:700;text-transform:uppercase;}
+.cday{font-size:11px;text-align:center;padding:5px 2px;border-radius:4px;cursor:pointer;color:var(--t2);transition:all .13s;}
+.cday:hover:not(.cempty){background:var(--surface);color:var(--t1);font-weight:600;}
+.cday.ctoday{color:var(--t1);font-weight:800;}
+.cday.csel{background:var(--t1);color:#fff;font-weight:700;}
+.cday.cempty{cursor:default;}
+.cfooter{margin-top:9px;display:flex;justify-content:flex-end;}
+
+/* SIDEBAR */
+.sb-bg{display:none;position:fixed;inset:0;background:rgba(28,21,16,.16);z-index:500;backdrop-filter:blur(2px);animation:fadeIn .2s ease;}
+.sb-bg.open{display:block;}
+.sb{position:fixed;right:-510px;top:0;bottom:0;width:490px;background:var(--card);border-left:1px solid var(--border-md);z-index:501;overflow-y:auto;transition:right .28s cubic-bezier(.4,0,.2,1);box-shadow:-6px 0 28px rgba(28,21,16,.10);}
+.sb.open{right:0;}
+.sb-hdr{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:flex-start;gap:12px;position:sticky;top:0;background:var(--card);z-index:1;}
+.sb-body{padding:18px 22px;display:flex;flex-direction:column;gap:18px;}
+.xbtn{background:var(--surface);border:1px solid var(--border-md);border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:15px;color:var(--t2);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .13s;}
+.xbtn:hover{background:var(--red-bg);color:var(--red);}
+.stitle{font-size:9px;font-weight:700;color:var(--t3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:9px;}
+.cmt-item{padding:9px 0;border-bottom:1px solid var(--border);}
+.cmt-item:last-child{border-bottom:none;}
+.hist-item{padding:5px 0;border-bottom:1px solid var(--border);font-size:10px;color:var(--t3);}
+.hist-item:last-child{border-bottom:none;}
+textarea{width:100%;padding:9px 11px;border:1px solid var(--border-md);border-radius:var(--r);font-size:12px;font-family:'Inter',sans-serif;resize:vertical;outline:none;background:var(--surface);color:var(--t1);transition:border-color .16s;}
+textarea:focus{border-color:var(--t2);background:var(--card);}
+.sb input[type=text]{padding:8px 11px;border:1px solid var(--border-md);border-radius:var(--r);font-size:12px;font-family:'Inter',sans-serif;outline:none;background:var(--surface);color:var(--t1);transition:border-color .16s;}
+.sb input:focus{border-color:var(--t2);background:var(--card);}
+
+/* MODAL */
+.mbg{display:none;position:fixed;inset:0;background:rgba(28,21,16,.22);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(3px);animation:fadeIn .18s ease;}
+.mbg.open{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border-md);border-radius:var(--rl);width:440px;max-width:95vw;box-shadow:var(--shl);animation:scaleIn .18s ease;overflow:hidden;}
+.mhdr{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;}
+.mbody{padding:16px 20px;display:flex;flex-direction:column;gap:9px;}
+.mftr{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:7px;background:var(--surface);}
+.modal input[type=text],.modal select,.modal textarea{padding:9px 11px;border:1px solid var(--border-md);border-radius:var(--r);font-size:12px;font-family:'Inter',sans-serif;background:var(--surface);outline:none;color:var(--t1);width:100%;transition:border-color .16s;}
+.modal input:focus,.modal select:focus,.modal textarea:focus{border-color:var(--t2);background:var(--card);}
+
+/* REPORT */
+.rcard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:11px;box-shadow:var(--sh);transition:transform .2s,box-shadow .2s;animation:fadeUp .34s ease both;}
+.rcard:hover{transform:translateY(-2px);box-shadow:var(--shm);}
+.rreg{font-size:13px;font-weight:800;margin-bottom:9px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;letter-spacing:-.2px;}
+.rrow{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border);gap:10px;}
+.rrow:last-child{border-bottom:none;}
+.ptrack{height:3px;background:var(--surface);border-radius:99px;margin:5px 0 12px;overflow:hidden;}
+.pfill{height:3px;background:var(--t1);border-radius:99px;width:0;transition:width .9s cubic-bezier(.4,0,.2,1);}
+
+/* TOAST */
+.toast{position:fixed;bottom:26px;right:26px;background:var(--t1);color:#fff;padding:10px 16px;border-radius:var(--r);font-size:11px;font-weight:600;opacity:0;transition:all .22s;pointer-events:none;z-index:9999;transform:translateY(6px);box-shadow:var(--shm);display:flex;align-items:center;gap:7px;}
+.toast.show{opacity:1;transform:translateY(0);}
+.tdot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.empty{text-align:center;padding:48px 24px;color:var(--t3);font-size:13px;}
+.del-btn{background:none;border:none;cursor:pointer;font-size:14px;color:var(--t4);padding:2px 5px;border-radius:4px;transition:all .15s;line-height:1;}
+.del-btn:hover{color:var(--red);background:var(--red-bg);}
+
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--t4);border-radius:99px;}
+
+@media(max-width:768px){
+  .metrics{grid-template-columns:repeat(2,1fr);}
+  .sb{width:100%;}
+  .page-title{font-size:20px;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="header">
+    <div class="header-left">
+      <img src="data:image/png;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCABwAS4DASIAAhEBAxEB/8QAHQABAAICAwEBAAAAAAAAAAAAAAcIAgYDBAUJAf/EAEsQAAEDAwIDAQoLBAYLAQAAAAEAAgMEBQYHEQgSITEJEzdBUWF1gZGzFBcYIlVWcZOi0tMjNjiyFTIzQpKhFjRDUmJzdISxtMHD/8QAGgEBAAIDAQAAAAAAAAAAAAAAAAMFAQIEBv/EACcRAQABAwIEBgMAAAAAAAAAAAABAgMEESEFEjFhBiIyQVFxgZGx/9oADAMBAAIRAxEAPwC5aIiAiIgIiICIiAiLVsz1EwnDa2GiyfI6K11E8ffY45ieZzNyOboD03BHqQbSijj49NJPr1a/x/lT49NJPr1a/wAf5UEjoo4+PTST69Wv8f5U+PTST69Wv8f5UEjoo4+PTST69Wv8f5U+PTST69Wv8f5UEjotPsOqOnd9mEFqzOy1EzujYzVNY532B2xK3AEOAIIIPYQgIiICIuOpnipqaWpnkbHDEwvke7sa0Dck+pByIo5OuekgJBzq17jzv/Kvz49NJPr1a/x/lQSOijj49NJPr1a/x/lT49NJPr1a/wAf5UEjoo4+PTST69Wv8f5U+PTST69Wv8f5UEjovIxLJ7BltqN1xu6U9yohIYjNCTyh4AJb18fUe1eugIiICIiAiIgIiICIiAiIgIiICIiAqF90i8K+Pegm+/lV9FQvukXhXx70E338qCraIiAiIgIi2rSPFoc21KsWKT1T6WK51QgdM1vMWAgncD1INYikkikEkUjo3jsc07EetWL4XeIm94ffqLHMrr5K3G53iLvkzi59Jv05gfG0eMKRb7wRUzoHOs2byRygfNZUUXMHH7Q8bKAdVtA9RdOw+puVrFbb2npWURMjB9o23BQfUGGSOaJssT2vY8BzXNO4I8qyUNcG2WzZXoXZ31cpkq7eDRSEnckR/NaSfKQN1MqAvGzv9yL96NqPdOXsrxs7/ci/ejaj3TkHyAREQEREBERB9Cu54+Aaq9O1Hu4VY5Vx7nj4Bqr07Ue7hVjkBERAREQEREBERAREQEREBERAREQFQvukXhXx70E338qvoqF90i8K+Pegm+/lQVbREQEREBSbwr/xDYV6Sb/K5RkpN4V/4hsK9JN/lcg+pa46mCGpgfBUQxzRPGz2PaHNcPIQVyIg1vCMJx/DDcmY7SfAqevn+EPp2H9mx+3XlHiB7dlsiIgLxs7/AHIv3o2o905eyvGzv9yL96NqPdOQfIBERAREQEREH0K7nj4Bqr07Ue7hVjlXHuePgGqvTtR7uFWOQEREBERAREQEREBERAREQEREBERAVC+6ReFfHvQTffyq+ioX3SLwr496Cb7+VBVtERAREQFJvCv/ABDYV6Sb/K5RkpN4V/4hsK9JN/lcg+paIiAqucUGq2Y6O6uWi7W0mssd0pOWooZjvG4sIG7T/dd136dqtGoU4wdMJdRtMJX2yESXm0k1VK0D50gAPOwfaCSB4yAg5NMeJTTLNIIopr1DZLg5o56evcIgD5A92zT6ipBzG72uqwK+zU1xpJo3WyoIfHM1wO8btuoK+SM8U1NUPhmY+KWNxa5rhsWkdoWYrawM5BVz8pG23fDsg4EREBERAREQfQruePgGqvTtR7uFWOVce54+Aaq9O1Hu4VY5AREQEREBERAREQEREBERARFEfGLca61cOOVV9tq5qOqjFIGTQvLXt3rIWnYjs3BI9aCXEUN8LGSxP0Ix6ryG+RfCZWO/aVlSA9/XyuO5UwwyxTRNlhkZJG4btcxwII8xCDNVq4stAcq1azS1XuwXK00sNHbhSyNq5HtcXd8e/ccrT02cF4HHNf73aM7wOG13atoo5pv2jYJnMD/2jR127VbRBQX5FmpH07jX38v6afIs1I+nca+/l/TV6q292ahl71W3egppOzklqGMPsJXcp54amFs1PNHNE7q18bg5p+whBQn5FmpH07jX38v6afIs1I+nca+/l/TV+Xuaxhe9wa0DcknYALpUd4tFZOYKS6UNRMO2OKoa53sB3QUT+RZqR9O419/L+mtw0W4U84wvVKwZVc7zYpaS21QnkZBLI57gARsAWAePyqwvEvWVdv0JyysoaiWmqYqMGOWJxa5p529QR2LU+Cq71tx0HpK+8XCaplFVMHT1MpcQAR2uKCcUXDSVVLVxmSkqYahgOxdE8OG/2hR/rFld5x2aghtLo2mcEuLmcxPmWtVUUxrLkzs23hWJv3OkfCRkWo6W5U7KLD32p5BWwO5Jg3oD5DsuhgOSXS7Zje7dWyMdT0u/egG7EbOA/wDqxzxt3Q0cUsXIs1U7xc6frXdpOtXDNhOolXLdqV77Dd5Or56eMOZIfK5m46+fdQDcuCnOWVDhb8lsU0O/R0zpI3EfYGH/AMq+LiGgucQAOpJ8S83+n7D3wx/03bedva34UzcerdbrFRf5FmpH07jX38v6afIs1I+nca+/l/TV9aWpp6qIS0s8U8Z6c8bw4e0LikuNvjkljkr6Vj4hzSNdM0Fg8pG/RBQ/5FmpH07jX38v6afIs1I+nca+/l/TV9KKspK6AT0VVBUxE7B8Mge0+sLCvuNvt7Q6vrqWkaewzytYD7Sgod8izUj6dxr7+X9NPkWakfTuNffy/pq+dFW0ddF32iq4KmP/AH4ZA8e0LnQRTwt6a3fSvTSXGb3V0dVVSXGWr56VziwNcxjQN3AHf5h8SlZee6+2RtT8GdeLeJ99u9GpZzb+TbfdegOo3CAi4H1lIypFM+qgbORuIjIA7by7dq4aW72mqqTTUtzop529scc7XOHqB3Qd1ERAREQEREBERAREQFDPG1/DFl3/AGX/ALsCmZQ3xrMfJwyZa1jS5x+B9ANz/rsCCt2k/DxPqBog7LbzlVxjlhppX2miieDDGGAkcwIPb2dNj9qlPufeXXa64vkWJ3erlqXWOoj7w6R3MWtk5wWA+QGP/NRhpzr5dtNNFhhl6w+s+E1FG82mqALWSRvBbzHft28yljgGwq8WHEb7lV6pX0suQ1Eb4WSAhxjZznm2PiJkPsQalx++EHT7/nf/AKsVw6hjn08jGv5HOaQHeQ7dqp/x8wyyagafFkb3Dv3aBv8A7RithlkddNjFyitjyytfTPEDh2h23RBT/K9JNF6KsuLNSNZKqryKV73E/C2jvRJJADXBx9pXv9zwyK6VlryTH6u4TVtFRStfSmR5dyA9Nm79gPbsoe0IyDAMOp8ht2pGDVN9y59W5lPDU0hnc522xYQ4HZ3Pv1PVSr3PqlqaPIs2gq6CSglZIGvp3s5TEQ4fN28yDYePbN77ZrLj+G4/XTUM99nPfpIXcr3xghvJuOoBc5vZ5Nl+4LwrUeOVVgyey5peYLxBLFUVnO4d6nb0LmbNAd5upK63H5hV9utsx/NbHSS1TrHI4TiNvMY2OcHB+3kDmt9q/cF4p5clqMcxex4XWzXmpligq3PJMcTBsHvAHXs3KCWuKf8Ah9zD/oR7xipbi+olzq9Hsd0bxad1LcLxXPNZVcxbysc7ZrAfUSfUrp8UjXP4f8waxpc40Q2AG5/tGKotBpdUZFwrWnNrJTPZf7FVzPJY0h8kAcDt5+U7kfaUF0dF8AotNsEo8bpamarlZvJU1MriXSyn+sfMPEB5AFrWuA3yOwA+Nw/mWXC5qV8ZOmNLW1ge27UG1JXhwI5ntA2f17eZpBPnJTW1jnZHYC1pPzx2D/iUV70KLxHvgVfdP9h5VLz6f6piIEstde7YA/1Q1x6f4SR7F62kxDtQ8kcDuDzEf42r3NY8cdfMXNTTRl1ZRDvjNh1c3xj2brUeHzv777dJZw8uMHznO8Z5go9JpriPZRRZrw+K2sXTyc01U9tYnWPxLDjSyG+45obX1Ngnlppp6iOnmmi6OjidvuQfFuQBv51VjVfTzAbDoXj2Y4/lFVV5LXyxtnb8LDjPzBxf0HUFpAHr8asnx6z3GHQaZtDVxQRSV8Latj3gGaLZx5G+U8wYdh4gVWnELvpLjc1tyK+aN5EGxNjJnkrHupjIB/X5XEggnrsV0vdLpcOmK02I6R2Sgp5q6U1NOyrlNW8OeHyNDiOgGw8gVP8AMbBkmecW+S4Var7UW+G4zhtXIJD0gbG3mAHj6HsV5NPMpsmZ4fb8ix6QPt1VHvEOXlLNjsWkeLYjZVR07gmb3QK+OdE8DkmO5adtu9MQWP0N05p9LMGGM09ynuETJpJRLKADs5xO3T7VT+8ZLieqevGQzap5dUWvGLdI+O30Ym5WyBruVrfJ2dSe3or+uHM0jyjZUEfRWbRTXjIGaj4TFfcdub5HUU81IJg1pdzNezmB3O3QoPc4bclt2I8Tf+hOE5FUXnDbtHIIhI/nEbmxukG3iBBbtv5CVYHi7zivwPRivuFqk7zX1srKKCUdsZeCS4efla72rUNCc90ry3UiKhwTTGnt8sED5XXVtvji7yNtttw0Eb77etbXxh4Rcc60XraK0wunrqGdldFCwEuk5Q5pA8/K4n1IKkw2HR+bSJ19qtQas6hujNTzfCeol3/s/L2dd999/GrYcGOY3TMtEqSpvE8lTWUFTJROnkJL5Q0NcCT4zs8DfzKvGmGqujVkwiks+a6WUkt/oWGKZ5tcbzO4E9SS3cHxdVbXQi6WS96cUV2x/Fo8Zoap73somQtj22cRzENAG5ACCrXE1T5HduLW349jl5ntlXcqaGkZM2QgMDxsStW1w08reHXMsbybHMnuNZNUPEkr53DmdI07uB2A5mnyHdSNqtDKePTEniN5bz0p5tuix7pHDLLT4p3uN7/nyD5o38RQXFREQEREBERAREQEREBYyMZIwskaHNPaCNwVkiDq1VuoKtsbamigmbEQWB8YPKR5F2gAAAAAB4giIMJYYpS0yRsfynccw32WaIg6rrdQOrW1rqOA1LRsJTGOYetc8cUUbnOjja0vO7iBtufOs0QCARsRuF1aK22+ikkkpKKngfId3ujjDS4+fZdpEH45oc0tcAQe0FYxxRxxiOONrWD+6BsFmiDCGKKFpbFG1gJ3IaNlk5jXEFzQSOzcdi/UQF+Na1u/K0Dft2C/UQQjxdaVZBqhh9vhxqoiFfbanv7aeZ/KyYcpG256A9R2+dRhk9r4mM2wQaeXDDLTb6CSKOmqKz4RF1jZtt4/MOxW9RBpGhuCjTnTS14qagVE1M0unlHY57iSdvN12W6CGISmYRsEhGxdt19qzRAXBW0VJXQmGspoqiM/3ZGBw/zXOiDgoqOkooRDR00VPGOxsbA0D2LnREHQms1pmrBWTW2kkqGncSuiBcD9q74AA2AACIgwdDE6Rsjo2F7exxHUJLDFMAJY2P2O45hvss0QEREBERAREQf/2Q==" alt="blackNgreen" class="logo">
+      <div class="page-title">SEA Region &mdash; KPI Tracker</div>
+      <div class="page-sub" id="last-sync">Loading...</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn filled av" id="btn-tracker" onclick="setView('tracker',this)">Daily tracker</button>
+      <button class="btn ghost"     id="btn-report"  onclick="setView('report',this)">Weekly report</button>
+      <button class="btn ghost" onclick="loadData()">&#8635; Refresh</button>
+      <button class="btn ghost" onclick="exportData()">&#8595; Export</button>
+      <label class="btn ghost" style="cursor:pointer;margin:0;">&#8593; Import<input type="file" accept=".json" onchange="importData(event)" style="display:none"></label>
+      <button class="btn green-btn" onclick="openAdd()">+ Add task</button>
+    </div>
+  </div>
+
+  <div id="save-banner" style="background:#faf2e4;border:1px solid rgba(122,74,0,.18);border-radius:var(--r);padding:9px 16px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:11px;color:var(--amber);">
+    <span>&#9888; Click <strong>Export</strong> to save your work as a file. Use <strong>Import</strong> to reload it next time you open the tracker.</span>
+    <button onclick="document.getElementById('save-banner').style.display='none'" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--amber);line-height:1;">&#215;</button>
+  </div>
+  <div class="metrics" id="metrics"></div>
+
+  <div id="tracker-view">
+    <div class="legend">
+      <span class="leg"><span class="sdot" style="background:var(--green)"></span>On track</span>
+      <span class="leg"><span class="sdot" style="background:var(--t4)"></span>Hold</span>
+      <span class="leg"><span class="sdot" style="background:var(--teal)"></span>Completed</span>
+      <span class="leg"><span class="stale-x" style="animation:none">!</span>No update 3+ days</span>
+      <span class="leg-hint">Click Owner or Timeline to edit &bull; Status dropdown per row</span>
+    </div>
+    <div class="tab-bar" id="region-tabs"></div>
+    <div class="controls">
+      <input type="text" class="search-inp" id="search" placeholder="Search task or owner..." oninput="renderTable()">
+      <select class="ctrl-sel" id="f-status" onchange="renderTable()">
+        <option value="">All statuses</option>
+        <option value="on-track">On track</option>
+        <option value="hold">Hold</option>
+        <option value="completed">Completed</option>
+      </select>
+      <select class="ctrl-sel" id="f-stale" onchange="renderTable()">
+        <option value="">All tasks</option>
+        <option value="stale">Stale only</option>
+      </select>
+    </div>
+    <div class="tcard">
+      <div class="tscroll">
+        <table>
+          <thead><tr>
+            <th style="width:3%"></th>
+            <th style="width:18%">Task</th>
+            <th style="width:8%">Owner</th>
+            <th style="width:10%">Status</th>
+            <th style="width:9%">Timeline</th>
+            <th style="width:7%">Days left</th>
+            <th style="width:27%">Latest update</th>
+            <th style="width:12%">Today's update</th>
+            <th style="width:5%">Details</th>
+            <th style="width:4%"></th>
+            <th style="width:4%"></th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div id="report-view" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <p style="font-size:20px;font-weight:800;letter-spacing:-.4px">Weekly status report</p>
+      <p style="font-size:10px;color:var(--t3)" id="report-date"></p>
+    </div>
+    <div id="report-content"></div>
+  </div>
+
+</div>
+
+<div id="cpop" class="cpop">
+  <div class="chead">
+    <button class="cnav" onclick="calNav(-1)">&#8249;</button>
+    <span class="cmlbl" id="clbl"></span>
+    <button class="cnav" onclick="calNav(1)">&#8250;</button>
+  </div>
+  <div class="cgrid" id="cgrid"></div>
+  <div class="cfooter"><button class="btn sm ghost" onclick="clearDate()">Clear</button></div>
+</div>
+
+<div class="sb-bg" id="sb-bg" onclick="closeSB()"></div>
+<div class="sb" id="sb">
+  <div class="sb-hdr">
+    <div style="flex:1;min-width:0">
+      <p style="font-weight:800;font-size:13px;line-height:1.4;white-space:normal;letter-spacing:-.2px" id="pt"></p>
+      <p style="font-size:10px;color:var(--t3);margin-top:3px" id="ps"></p>
+    </div>
+    <button class="xbtn" onclick="closeSB()">&#215;</button>
+  </div>
+  <div class="sb-body">
+    <div>
+      <div class="stitle">Today's update</div>
+      <textarea id="di" rows="3" placeholder="What's the latest? Any blockers or progress?"></textarea>
+      <button class="btn filled av" style="margin-top:9px;width:100%;font-size:11px" onclick="saveUpdate()">Save today's update</button>
+    </div>
+    <div>
+      <div class="stitle">Status history</div>
+      <div id="hist"></div>
+    </div>
+    <div>
+      <div class="stitle">Team comments</div>
+      <div style="display:flex;gap:6px;margin-bottom:11px;align-items:center">
+        <input type="text" id="ni" placeholder="Your name" style="width:110px;flex-shrink:0">
+        <input type="text" id="ci" placeholder="Add a comment..." style="flex:1">
+        <button class="btn sm filled av" onclick="postCmt()">Post</button>
+      </div>
+      <div id="cmts"></div>
+    </div>
+  </div>
+</div>
+
+<div class="mbg" id="add-modal">
+  <div class="modal">
+    <div class="mhdr">
+      <span style="font-weight:800;font-size:13px;letter-spacing:-.2px">Add new task</span>
+      <button class="xbtn" onclick="closeAdd()">&#215;</button>
+    </div>
+    <div class="mbody">
+      <input type="text" id="a-task" placeholder="Task name *">
+      <input type="text" id="a-owner" placeholder="Owner">
+      <select id="a-region">
+        <option value="Vodacom Tanzania / Tigo Tanzania">Vodacom Tanzania / Tigo Tanzania</option>
+        <option value="MTN Uganda">MTN Uganda</option>
+        <option value="BTC Botswana">BTC Botswana</option>
+        <option value="Safaricom Ethiopia">Safaricom Ethiopia</option>
+        <option value="Ethiotel Ethiopia">Ethiotel Ethiopia</option>
+        <option value="MTN Zambia">MTN Zambia</option>
+        <option value="Sierra Leone">Sierra Leone</option>
+        <option value="LATAM">LATAM</option>
+      </select>
+      <select id="a-status">
+        <option value="on-track">On track</option>
+        <option value="hold">Hold</option>
+        <option value="completed">Completed</option>
+      </select>
+      <input type="text" id="a-tl" placeholder="Timeline (e.g. 20 Apr 2026)">
+      <textarea id="a-upd" rows="2" placeholder="Latest update / notes"></textarea>
+    </div>
+    <div class="mftr">
+      <button class="btn ghost" onclick="closeAdd()">Cancel</button>
+      <button class="btn green-btn" onclick="saveAdd()">Save task</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="tdot" id="tdot"></span><span id="tmsg"></span></div>
+
+<script>
+const REGIONS=['Vodacom Tanzania / Tigo Tanzania','MTN Uganda','BTC Botswana','Safaricom Ethiopia','Ethiotel Ethiopia','MTN Zambia','Sierra Leone','LATAM'];
+const RICS={'Vodacom Tanzania / Tigo Tanzania':'🇹🇿','MTN Uganda':'🇺🇬','BTC Botswana':'🇧🇼','Safaricom Ethiopia':'🇪🇹','Ethiotel Ethiopia':'🇪🇹','MTN Zambia':'🇿🇲','Sierra Leone':'🇸🇱','LATAM':'🌎'};
+const AVC=['#e8e4d8','#dce8e0','#f0dcd8','#f0e8d4','#ecdce8','#e4e4e0','#e4dff0','#dce4ec'];
+const ATC=['#5a4020','#1a5c2a','#7a2820','#7a5000','#6a2858','#3a3a34','#3a2a6a','#1a3a5a'];
+const LBL={'on-track':'On track','hold':'Hold','completed':'Completed'};
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const STALE=3,SK='bng-neutral-v3';
+
+let calY=new Date().getFullYear(),calM=new Date().getMonth(),calId=null;
+let tasks=[],upds={},cmts={},hist={};
+let curTab='all',curView='tracker',activeId=null,nid=500;
+
+const SEED=[{"id": "t1", "region": "Vodacom Tanzania / Tigo Tanzania", "task": "Vodacom Tanzania Server 2 Upgrade", "owner": "Abi", "status": "on-track", "timeline": "18 Apr 2026", "update": "Error sample has been shared to engg team and also we have found an issue with core engine updation and Amar is working on the same."}, {"id": "t2", "region": "Vodacom Tanzania / Tigo Tanzania", "task": "Bidirectional Connectivity for Swipe & Win", "owner": "Abi", "status": "on-track", "timeline": "18 Apr 2026", "update": "Vivek raised mail with Mwasam, testing got successful for digital redirection and need update to move this flow to production."}, {"id": "t3", "region": "Vodacom Tanzania / Tigo Tanzania", "task": "OBD Scripts - Religious Portal (Vodacom TZ)", "owner": "Abi", "status": "completed", "timeline": "21 Apr 2026", "update": "On HOLD - Need to speak with Cathy and get this completed and need to raise with our Product team for flow and scripts."}, {"id": "t4", "region": "Vodacom Tanzania / Tigo Tanzania", "task": "OBD Scripts - Magic Voice (Tigo Tanzania)", "owner": "Abi", "status": "hold", "timeline": "21 Apr 2026", "update": "ON HOLD until Vodacom asks."}, {"id": "t5", "region": "Vodacom Tanzania / Tigo Tanzania", "task": "New Launch: Virtual Receptionist", "owner": "Abi", "status": "on-track", "timeline": "23 Apr 2026", "update": "With Shelo."}, {"id": "t6", "region": "Vodacom Tanzania / Tigo Tanzania", "task": "New Launch: MDUNDO Service", "owner": "Abi", "status": "on-track", "timeline": "24 Apr 2026", "update": "1) Need proper flow from Cathy in Swahili. 2) Recording will be done by operator. 3) Need song from operator side."}, {"id": "t7", "region": "Vodacom Tanzania / Tigo Tanzania", "task": "New Launch: MDUNDO Addendum", "owner": "Abi", "status": "on-track", "timeline": "23 Apr 2026", "update": "Doubt clarified and it will be done once we complete with MDUNDO progress."}, {"id": "t8", "region": "Vodacom Tanzania / Tigo Tanzania", "task": "Campaign report to Cathy every week", "owner": "Abi", "status": "completed", "timeline": "21 Apr 2026", "update": "Done."}, {"id": "t10", "region": "Vodacom Tanzania / Tigo Tanzania", "task": "Weekly 21 SMS Scripts from Catherine", "owner": "Catherine", "status": "completed", "timeline": "21 Apr 2026", "update": "Done. 7 Engagement SMS + 7 Swipe n Win + 7 Religious portal. All 7 days approved by Vodacom."}, {"id": "t11", "region": "MTN Uganda", "task": "New Launch: IVR MTN Proggie VM Server", "owner": "Ali", "status": "on-track", "timeline": "09 Apr 2026", "update": "Ali shared the IPs details and now waiting for Linda update for next progress."}, {"id": "t12", "region": "MTN Uganda", "task": "Next set of questions", "owner": "Brenda", "status": "on-track", "timeline": "07 Apr 2026", "update": "Waiting for Brenda approval on the next category to be implemented."}, {"id": "t13", "region": "MTN Uganda", "task": "Group/Squad and 1 Million Contest", "owner": "MTN Team", "status": "on-track", "timeline": "09 Apr 2026", "update": "We have shared user journey and data from previous campaigns and MTN team is reviewing. Meeting tomorrow."}, {"id": "t14", "region": "MTN Uganda", "task": "HE Issues, question repeated and callback", "owner": "George", "status": "on-track", "timeline": "07 Apr 2026", "update": "Question issue handled by us and sorted. HE issues handled by MTN team. George is working on the callback issue."}, {"id": "t16", "region": "MTN Uganda", "task": "New Launch: AI on Cal", "owner": "Pavan", "status": "on-track", "timeline": "30 Apr 2026", "update": "Pavan handling."}, {"id": "t17", "region": "BTC Botswana", "task": "ZBP Loan & Mobile Wallet - Revenue share", "owner": "Pavan", "status": "on-track", "timeline": "26 Apr 2026", "update": "Check the revenue share status for ZBP loan and mobile wallet. Follow up in progress."}, {"id": "t18", "region": "BTC Botswana", "task": "SNW Business Case - Internal follow up", "owner": "Pavan", "status": "on-track", "timeline": "", "update": "Follow up on the internal business case for SNW."}, {"id": "t19", "region": "BTC Botswana", "task": "New Launch: Personal Assistant", "owner": "Aadhi", "status": "on-track", "timeline": "19 Apr 2026", "update": "Thato went MIA and now he texted back. Aadhi will do testing. Cynthia is working on short code, HLR and email passwords."}, {"id": "t20", "region": "BTC Botswana", "task": "Loan Credit", "owner": "Cynthia", "status": "on-track", "timeline": "09 Apr 2026", "update": "Cynthia requested billing API details from Tabiso and he will assist on the same."}, {"id": "t21", "region": "BTC Botswana", "task": "Payment Break-up", "owner": "Murugan", "status": "completed", "timeline": "09 Apr 2026", "update": "Murugan needs to share the break-up details in mail."}, {"id": "t22", "region": "BTC Botswana", "task": "Kitso Promotional Planner", "owner": "Cynthia", "status": "completed", "timeline": "23 Apr 2026", "update": "Cynthia will let us know again when they are running campaign."}, {"id": "t23", "region": "BTC Botswana", "task": "BTC Christianity Portal Content Update", "owner": "Cynthia", "status": "completed", "timeline": "23 Apr 2026", "update": "Cynthia will update if she is having any calendar plan."}, {"id": "t25", "region": "Safaricom Ethiopia", "task": "Safaricom Magicvoice Implementation", "owner": "Bekalu", "status": "on-track", "timeline": "09 Apr 2026", "update": "All user IDs facing connectivity issue. Bekalu provided all scripts and voice samples. Huge slow response from Scom side regarding SIP routing and billing API."}, {"id": "t26", "region": "MTN Zambia", "task": "ZBP: Follow up on WCP URS", "owner": "Pavan", "status": "on-track", "timeline": "09 Apr 2026", "update": "Follow up on the WCP URS. Pavan handling."}, {"id": "t27", "region": "MTN Zambia", "task": "Bundle Pack: Bundle pack proposal RVB", "owner": "Pavan", "status": "on-track", "timeline": "10 Apr 2026", "update": "Bundle pack proposal RVB to be discussed on Monday."}, {"id": "t28", "region": "MTN Zambia", "task": "Knowledge Service", "owner": "Rajneesh", "status": "on-track", "timeline": "10 Apr 2026", "update": "Rajneesh is working on the same."}, {"id": "t29", "region": "MTN Zambia", "task": "SNW: Swipe n Win bundle pack RVB", "owner": "Pavan", "status": "on-track", "timeline": "09 Apr 2026", "update": "SNW bundle pack to be discussed with RVB."}];
+const SEED_UPDS={"t1_2026-04-16": {"text": "Its still with core engine team.", "ts": 1776332482389}, "t2_2026-04-16": {"text": "We are waiting for opco side to share production credentials.", "ts": 1776332529817}, "t5_2026-04-16": {"text": "With shelo.", "ts": 1776332570352}, "t6_2026-04-16": {"text": "We have initiated test call to the shortcode but the calls are failing to initiate. Escalated the same with opco.", "ts": 1776332842868}, "t7_2026-04-16": {"text": "It will be done once MDUNDO service got completed.", "ts": 1776332882981}, "t8_2026-04-16": {"text": "Done for this week", "ts": 1776332935662}, "t10_2026-04-16": {"text": "Done for this week.", "ts": 1776332999625}, "t11_2026-04-16": {"text": "Moses shared IPs and subnets details over the mail.", "ts": 1776333324050}, "t12_2026-04-16": {"text": "Working on the images.", "ts": 1776333359256}, "t13_2026-04-16": {"text": "Still waiting to receive feedback for the shared miro board userflow.", "ts": 1776333405073}, "t14_2026-04-16": {"text": "Question repeated sorted. Callback issues is handling by george.", "ts": 1776333753053}, "t19_2026-04-16": {"text": "Requested short code and few details from cynthia. Also received email account from cynthia. Due to marathon btc is busy we can expect remaining details by next week. Assistance name as kitso. Anjali is working on the flow.", "ts": 1776333897867}, "t22_2026-04-16": {"text": "Cynthia will update the campaign date.", "ts": 1776333965695}, "t23_2026-04-16": {"text": "As of now no seasonal calendar.", "ts": 1776333994784}, "t25_2026-04-16": {"text": "Working on the connectivity issue", "ts": 1776334358154}, "t1_2026-04-17": {"text": "Core engine team is working on the same", "ts": 1776402436859}, "t2_2026-04-17": {"text": "We are waiting to receive production credential.", "ts": 1776402466364}, "t5_2026-04-17": {"text": "Once done with MDUNDO we will initiate this.", "ts": 1776402513628}, "t6_2026-04-17": {"text": "Singham made a test call to the short code and noticed that the call is not being routed to the long code. The calls are failing to initiate.", "ts": 1776402599910}, "t7_2026-04-17": {"text": "It will be done from opco side.", "ts": 1776402637441}, "t8_2026-04-17": {"text": "Done for this week.", "ts": 1776402653123}, "t10_2026-04-17": {"text": "Done for this week.", "ts": 1776402658245}, "t11_2026-04-17": {"text": "Moses shared IPs and subnets details with farouk. Now waiting for their update.", "ts": 1776402787900}, "t12_2026-04-17": {"text": "Working on the images.", "ts": 1776402801256}, "t13_2026-04-17": {"text": "Brenda said we will initiate progress after sorting all issues because errors would impact group/squad outcome.", "ts": 1776402837157}, "t14_2026-04-17": {"text": "Repeated question issue sorted. HE issue handling by both bng and mtn. George is working on the callback issue.", "ts": 1776402885795}, "t17_2026-04-17": {"text": "Waiting for tabiso response on recharge APIs.", "ts": 1776402915187}, "t19_2026-04-17": {"text": "Short code and other details expected from cynthia by next week. Named assistance as KITSO. Received flows from product team, anjali will work on the same.", "ts": 1776403065235}, "t21_2026-04-17": {"text": "Done", "ts": 1776403079148}, "t23_2026-04-17": {"text": "No seasonal calendar for this month.", "ts": 1776403173268}, "t25_2026-04-17": {"text": "Vardhaman and scom team is working on the connectivity issue.", "ts": 1776403233093}, "t28_2026-04-17": {"text": "Rajneesh will update once done with the testing phase.", "ts": 1776403258187}};
+const SEED_CMTS={"t2": [{"name": "Abi", "text": "Pending from OPCO side", "ts": 1776332532181}], "t5": [{"name": "Abi", "text": "Pending from OPCO side.", "ts": 1776332576685}], "t6": [{"name": "Abi", "text": "Working from OPCO side issue.", "ts": 1776332843924}], "t7": [{"name": "Abi", "text": "MDUNDO team", "ts": 1776332882149}], "t11": [{"name": "Abi", "text": "Work is going from opco side", "ts": 1776333325082}], "t12": [{"name": "Abi", "text": "Abi is working on this.", "ts": 1776333356551}], "t13": [{"name": "Abi", "text": "Pending from OPCO.", "ts": 1776333406378}], "t14": [{"name": "Abi", "text": "George is working on the callback issue.", "ts": 1776333754197}], "t19": [{"name": "Abi", "text": "BNG and BTC both the sides are working.", "ts": 1776333898988}], "t22": [{"name": "Abi", "text": "They will run campaign from BTC side.", "ts": 1776333966754}]};
+const SEED_HIST={"t3": [{"from": "hold", "to": "completed", "ts": 1776334594537}], "t21": [{"from": "on-track", "to": "completed", "ts": 1776403073287}]};
+
+
+function deleteTask(id){
+  const p=tasks.find(x=>x.id===id);if(!p)return;
+  const confirm_msg='Delete "'+p.task+'"?\n\nThis cannot be undone.';
+  if(!window.confirm(confirm_msg))return;
+  tasks=tasks.filter(x=>x.id!==id);
+  // clean up related data
+  delete upds[id];delete cmts[id];delete hist[id];
+  Object.keys(upds).forEach(k=>{if(k.startsWith(id+'_'))delete upds[k];});
+  sv();buildTabs();renderAll();toast('Task deleted','warn');
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify({tasks,upds,cmts,hist},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  const now=new Date();const stamp=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+  a.href=url;a.download='BNG_SEA_Tracker_'+stamp+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast('Data exported');
+}
+function importData(ev){
+  const file=ev.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{const d=JSON.parse(e.target.result);
+      if(!d.tasks||!Array.isArray(d.tasks)){alert('Invalid file.');return;}
+      tasks=d.tasks;upds=d.upds||{};cmts=d.cmts||{};hist=d.hist||{};
+      sv();buildTabs();renderAll();toast('Imported '+tasks.length+' tasks');
+    }catch(err){alert('Could not read file.');}
+    ev.target.value='';
+  };reader.readAsText(file);
+}
+function deleteTask(id){
+  const p=tasks.find(x=>x.id===id);if(!p)return;
+  if(!window.confirm('Delete task?'))return;
+  tasks=tasks.filter(x=>x.id!==id);
+  Object.keys(upds).forEach(k=>{if(k.startsWith(id+'_'))delete upds[k];});
+  delete cmts[id];delete hist[id];
+  sv();buildTabs();renderAll();toast('Task deleted','warn');
+}
+function sv(){try{localStorage.setItem(SK,JSON.stringify({tasks,upds,cmts,hist}));}catch(e){}}
+function loadData(){
+  try{const r=localStorage.getItem(SK);if(r){const d=JSON.parse(r);tasks=d.tasks||JSON.parse(JSON.stringify(SEED));upds=d.upds||JSON.parse(JSON.stringify(SEED_UPDS));cmts=d.cmts||JSON.parse(JSON.stringify(SEED_CMTS));hist=d.hist||JSON.parse(JSON.stringify(SEED_HIST));}else{tasks=JSON.parse(JSON.stringify(SEED));upds=JSON.parse(JSON.stringify(SEED_UPDS));cmts=JSON.parse(JSON.stringify(SEED_CMTS));hist=JSON.parse(JSON.stringify(SEED_HIST));}}
+  catch(e){tasks=JSON.parse(JSON.stringify(SEED));upds=JSON.parse(JSON.stringify(SEED_UPDS));cmts=JSON.parse(JSON.stringify(SEED_CMTS));hist=JSON.parse(JSON.stringify(SEED_HIST));}
+  document.getElementById('last-sync').textContent='Last updated: '+fts(Date.now());
+  buildTabs();renderAll();
+}
+function ini(n){if(!n)return'?';return n.split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2)||'?';}
+function av(n){const i=(n||'x').charCodeAt(0)%8;return`<span class="av-chip" style="background:${AVC[i]};color:${ATC[i]}">${ini(n)}</span>`;}
+function fts(ts){if(!ts)return'';const d=new Date(ts);return d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});}
+function tod(){return new Date().toISOString().slice(0,10);}
+function toast(m,t='ok'){
+  const el=document.getElementById('toast');
+  document.getElementById('tdot').style.background=t==='ok'?'#4ade80':t==='warn'?'#fbbf24':'#93c5fd';
+  document.getElementById('tmsg').textContent=m;
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2400);
+}
+function e(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function tr(s,n){if(!s)return'';return s.length>n?s.slice(0,n)+'…':s;}
+function parseTL(tl){
+  if(!tl||['','—','TBH','Hold','Completed'].includes(tl))return null;
+  const ms={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+  const s=tl.toLowerCase().replace(/st|nd|rd|th/g,'');
+  const m1=s.match(/([a-z]{3})\w*\s+(\d{1,2})\s+(\d{4})/);if(m1&&ms[m1[1]]!==undefined)return new Date(+m1[3],ms[m1[1]],+m1[2]);
+  const m2=s.match(/(\d{1,2})\s+([a-z]{3})\w*\s+(\d{4})/);if(m2&&ms[m2[2]]!==undefined)return new Date(+m2[3],ms[m2[2]],+m2[1]);
+  return null;
+}
+function dl(tl){const d=parseTL(tl);if(!d)return null;return Math.round((d-new Date())/864e5);}
+function dchip(tl,st){
+  if(st==='completed')return'<span class="dchip" style="background:var(--teal-bg);color:var(--teal)">&#10003; Done</span>';
+  const d=dl(tl);if(d===null)return'<span style="font-size:10px;color:var(--t4)">—</span>';
+  if(d<0)return`<span class="dchip" style="background:var(--red-bg);color:var(--red);font-weight:800">${Math.abs(d)}d over</span>`;
+  if(d<=3)return`<span class="dchip" style="background:var(--red-bg);color:var(--red)">${d}d left</span>`;
+  if(d<=7)return`<span class="dchip" style="background:var(--amber-bg);color:var(--amber)">${d}d left</span>`;
+  return`<span class="dchip" style="background:var(--green-bg);color:var(--green)">${d}d left</span>`;
+}
+function stale(id){const ks=Object.keys(upds).filter(k=>k.startsWith(id+'_'));if(!ks.length)return true;return(Date.now()-Math.max(...ks.map(k=>upds[k].ts||0)))>(STALE*864e5);}
+function sdot(s){const c=s==='hold'?'var(--t4)':s==='completed'?'var(--teal)':'var(--green)';return`<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${c}"></span>`;}
+function cntUp(el,tgt){
+  const t0=performance.now();const dur=700;
+  function step(t){const p=Math.min((t-t0)/dur,1);el.textContent=Math.round((1-Math.pow(1-p,3))*tgt);if(p<1)requestAnimationFrame(step);else el.textContent=tgt;}
+  requestAnimationFrame(step);
+}
+
+function buildTabs(){
+  const bar=document.getElementById('region-tabs');
+  const all=[{id:'all',label:'All',ic:''},...REGIONS.map(r=>({id:r,label:r,ic:RICS[r]||''}))];
+  bar.innerHTML=all.map(t=>{
+    const cnt=t.id==='all'?tasks.length:tasks.filter(x=>x.region===t.id).length;
+    const short=t.id==='all'?'All':t.label.replace('Tanzania','TZ').replace('Botswana','BW').replace('Ethiopia','ETH').replace('Zambia','ZM').split('/')[0].trim().split(' ').slice(0,3).join(' ');
+    return`<button class="tab${t.id===curTab?' active':''}" onclick="setTab('${e(t.id)}',this)" title="${e(t.id)}">${t.ic} ${short}<span class="tab-n">${cnt}</span></button>`;
+  }).join('');
+}
+function setTab(t,el){curTab=t;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));el.classList.add('active');renderTable();}
+
+function setView(v,el){
+  curView=v;
+  const bt=document.getElementById('btn-tracker');
+  const br=document.getElementById('btn-report');
+  bt.className='btn '+(v==='tracker'?'filled av':'ghost');
+  br.className='btn '+(v==='report'?'filled av':'ghost');
+  document.getElementById('tracker-view').style.display=v==='tracker'?'block':'none';
+  document.getElementById('report-view').style.display=v==='report'?'block':'none';
+  if(v==='report')renderReport();
+}
+
+function renderAll(){renderMetrics();if(curView==='tracker')renderTable();else renderReport();}
+
+function renderMetrics(){
+  const tot=tasks.length,hold=tasks.filter(p=>p.status==='hold').length;
+  const sl=tasks.filter(t=>t.status==='on-track'&&stale(t.id)).length;
+  const done=tasks.filter(p=>p.status==='completed').length;
+  const d=[{l:'Total tasks',v:tot,c:'c-black'},{l:'On hold',v:hold,c:'c-red'},{l:`Stale (${STALE}d+)`,v:sl,c:'c-amber'},{l:'Completed',v:done,c:'c-green'}];
+  document.getElementById('metrics').innerHTML=d.map((x,i)=>`
+    <div class="metric" style="animation-delay:${i*.07}s">
+      <div class="metric-label">${x.l}</div>
+      <div class="metric-num ${x.c}" id="mv${i}">0</div>
+    </div>`).join('');
+  d.forEach((x,i)=>cntUp(document.getElementById('mv'+i),x.v));
+}
+
+function gf(){
+  const s=document.getElementById('search').value.toLowerCase();
+  const fs=document.getElementById('f-status').value;
+  const fst=document.getElementById('f-stale').value;
+  return tasks.filter(p=>{
+    if(curTab!=='all'&&p.region!==curTab)return false;
+    if(s&&!p.task.toLowerCase().includes(s)&&!(p.owner||'').toLowerCase().includes(s))return false;
+    if(fs&&p.status!==fs)return false;
+    if(fst==='stale'&&!(p.status==='on-track'&&stale(p.id)))return false;
+    return true;
+  });
+}
+function chSt(id,ns){
+  const p=tasks.find(x=>x.id===id);if(!p||p.status===ns)return;
+  if(!hist[id])hist[id]=[];hist[id].push({from:p.status,to:ns,ts:Date.now()});
+  p.status=ns;sv();renderAll();toast('Status → '+LBL[ns]);
+}
+function svOwner(id,val){const p=tasks.find(x=>x.id===id);if(!p)return;p.owner=val.trim();sv();toast('Owner saved','info');}
+
+function renderTable(){
+  const filt=gf();const tbody=document.getElementById('tbody');
+  if(!filt.length){tbody.innerHTML=`<tr><td colspan="9"><div class="empty">No tasks match your filters.</div></td></tr>`;return;}
+  const grp={};const ord=curTab==='all'?REGIONS:[curTab];
+  ord.forEach(r=>{const rows=filt.filter(t=>t.region===r);if(rows.length)grp[r]=rows;});
+  let html='';const td=tod();
+  Object.entries(grp).forEach(([region,rows])=>{
+    html+=`<tr class="shdr"><td colspan="9">${(RICS[region]||'')+' '+e(region).toUpperCase()}</td></tr>`;
+    rows.forEach((p,ri)=>{
+      const uk=p.id+'_'+td;const uv=(upds[uk]||{}).text||'';
+      const sl=p.status==='on-track'&&stale(p.id);
+      const cc=(cmts[p.id]||[]).length;
+      const opts=['on-track','hold','completed'].map(s=>`<option value="${s}"${s===p.status?' selected':''}>${LBL[s]}</option>`).join('');
+      html+=`<tr class="trow${sl?' stale-row':''}" style="animation-delay:${ri*.04}s">
+        <td class="col-clip" style="text-align:center;overflow:visible;vertical-align:top;padding-top:12px;">
+          <div style="display:inline-flex;align-items:center;gap:3px">
+            ${sdot(p.status)}
+            ${sl?`<span class="stale-x" title="No update ${STALE}+ days">!</span>`:''}
+          </div>
+        </td>
+        <td class="col-task" style="font-weight:${sl?600:500};font-size:12px;color:${sl?'var(--red)':'var(--t1)'};" title="${e(p.task)}">${e(p.task)}</td>
+        <td class="col-clip" style="vertical-align:top;padding-top:10px;"><input class="einput" value="${e(p.owner||'')}" placeholder="add owner" onblur="svOwner('${p.id}',this.value)" onkeydown="if(event.key==='Enter')this.blur()"></td>
+        <td class="col-clip" style="vertical-align:top;padding-top:10px;overflow:visible;"><select class="ssel ${p.status}" onchange="chSt('${p.id}',this.value);this.className='ssel '+this.value">${opts}</select></td>
+        <td class="col-clip" style="vertical-align:top;padding-top:10px;overflow:visible;"><button class="cbtn${p.timeline?'':' empty'}" onclick="openCal('${p.id}',this)">${e(p.timeline)||'Pick date'}</button></td>
+        <td class="col-clip" style="vertical-align:top;padding-top:10px;">${dchip(p.timeline,p.status)}</td>
+        <td class="col-update">${e(p.update||'—')}</td>
+        <td class="col-clip" style="vertical-align:top;padding-top:10px;"><span class="ucell${uv?' hv':''}" onclick="openSB('${p.id}')" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;">${uv?tr(e(uv),22):'+ Add update'}</span></td>
+        <td class="col-clip" style="vertical-align:top;padding-top:8px;"><button class="btn sm ghost" onclick="openSB('${p.id}')" style="font-size:10px">${cc?`&#128172; ${cc}`:'Open'}</button></td>
+        <td class="col-clip" style="vertical-align:top;padding-top:7px;text-align:center;">
+          <button class="del-btn" onclick="deleteTask('${p.id}')" title="Delete task">&#128465;</button>
+        </td>
+      </tr>`;
+    });
+  });
+  tbody.innerHTML=html;
+}
+
+function renderReport(){
+  const now=new Date();
+  const ws=new Date(now);ws.setDate(now.getDate()-now.getDay()+1);
+  const we=new Date(ws);we.setDate(ws.getDate()+6);
+  const fmt=d=>d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+  document.getElementById('report-date').textContent=fmt(ws)+' – '+fmt(we);
+  let html='';
+  REGIONS.forEach((region,ri)=>{
+    const rt=tasks.filter(t=>t.region===region);const ic=RICS[region]||'';
+    if(!rt.length){html+=`<div class="rcard" style="animation-delay:${ri*.07}s"><div class="rreg"><span>${ic} ${e(region)}</span><span style="font-size:10px;color:var(--t3)">No tasks yet</span></div><p style="font-size:11px;color:var(--t3)">Add tasks via the Daily tracker.</p></div>`;return;}
+    const done=rt.filter(t=>t.status==='completed').length;
+    const pct=Math.round((done/rt.length)*100);
+    const sl=rt.filter(t=>t.status==='on-track'&&stale(t.id));
+    html+=`<div class="rcard" style="animation-delay:${ri*.07}s">
+      <div class="rreg"><span>${ic} ${e(region)}</span><span style="font-size:11px;font-weight:700;color:var(--t2)">${done}/${rt.length} done &middot; ${pct}%</span></div>
+      <div class="ptrack"><div class="pfill" data-p="${pct}"></div></div>
+      <div style="display:flex;gap:5px;margin-bottom:11px;flex-wrap:wrap">
+        ${['on-track','hold','completed'].map(s=>{const c=rt.filter(t=>t.status===s).length;return c?`<span class="badge ${s}">${c} ${LBL[s]}</span>`:''}).join('')}
+        ${sl.length?`<span class="badge" style="background:var(--red-bg);color:var(--red)">${sl.length} stale</span>`:''}
+      </div>`;
+    rt.filter(t=>t.status!=='completed').forEach(t=>{
+      const d=dl(t.timeline);
+      const dt=d===null?'':d<0?` <span style="color:var(--red);font-size:10px;font-weight:700">${Math.abs(d)}d overdue</span>`:d<=7?` <span style="color:var(--amber);font-size:10px">${d}d left</span>`:'';
+      const isl=sl.find(x=>x.id===t.id);
+      html+=`<div class="rrow">
+        <div style="flex:1;min-width:0">
+          <span style="font-weight:700;font-size:12px">${e(t.task)}</span>
+          ${isl?'<span class="stale-x" style="margin-left:5px;display:inline-flex;vertical-align:middle">!</span>':''}${dt}
+          <div style="font-size:11px;color:var(--t2);margin-top:3px;line-height:1.5;white-space:normal;">${e(t.update||'—')}</div>
+          ${t.owner?`<div style="font-size:10px;color:var(--t3);margin-top:1px">→ ${e(t.owner)}</div>`:''}
+        </div>
+        <span class="badge ${t.status}" style="margin-left:9px;flex-shrink:0">${LBL[t.status]}</span>
+      </div>`;
+    });
+    html+=`</div>`;
+  });
+  document.getElementById('report-content').innerHTML=html;
+  setTimeout(()=>{document.querySelectorAll('.pfill[data-p]').forEach(el=>{el.style.width=el.getAttribute('data-p')+'%';});},80);
+}
+
+function buildCal(){
+  const first=new Date(calY,calM,1);const lastD=new Date(calY,calM+1,0).getDate();
+  const sd=(first.getDay()+6)%7;const now=new Date();
+  document.getElementById('clbl').textContent=MONTHS[calM]+' '+calY;
+  let html=['Mo','Tu','We','Th','Fr','Sa','Su'].map(d=>`<div class="cdow">${d}</div>`).join('');
+  for(let i=0;i<sd;i++)html+=`<div class="cday cempty"></div>`;
+  for(let d=1;d<=lastD;d++){const it=d===now.getDate()&&calM===now.getMonth()&&calY===now.getFullYear();html+=`<div class="cday${it?' ctoday':''}" onclick="pickD(${d})">${d}</div>`;}
+  document.getElementById('cgrid').innerHTML=html;
+}
+function calNav(dir){calM+=dir;if(calM>11){calM=0;calY++;}else if(calM<0){calM=11;calY--;}buildCal();}
+function openCal(id,btn){
+  calId=id;const pop=document.getElementById('cpop');
+  buildCal();
+  // Use fixed positioning relative to viewport so it always appears near the button
+  pop.classList.add('open');
+  const r=btn.getBoundingClientRect();
+  const popH=pop.offsetHeight||240;
+  const popW=pop.offsetWidth||240;
+  // Position below button if space, above if not
+  let top=r.bottom+6;
+  if(top+popH>window.innerHeight-10) top=r.top-popH-6;
+  if(top<10) top=10;
+  let left=r.left;
+  if(left+popW>window.innerWidth-10) left=window.innerWidth-popW-10;
+  if(left<10) left=10;
+  pop.style.top=top+'px';
+  pop.style.left=left+'px';
+}
+function closeCal(){document.getElementById('cpop').classList.remove('open');calId=null;}
+function clearDate(){if(calId){const p=tasks.find(x=>x.id===calId);if(p){p.timeline='';sv();renderTable();toast('Timeline cleared','warn');}}closeCal();}
+function pickD(d){
+  if(!calId)return;
+  const ms=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const lb=`${String(d).padStart(2,'0')} ${ms[calM]} ${calY}`;
+  const p=tasks.find(x=>x.id===calId);if(p){p.timeline=lb;sv();renderTable();toast('Timeline → '+lb);}
+  closeCal();
+}
+document.addEventListener('click',function(ev){const pop=document.getElementById('cpop');if(pop.classList.contains('open')&&!pop.contains(ev.target)&&!ev.target.classList.contains('cbtn'))closeCal();});
+
+function openSB(id){
+  activeId=id;const p=tasks.find(x=>x.id===id);if(!p)return;
+  document.getElementById('pt').textContent=p.task;
+  document.getElementById('ps').textContent=(RICS[p.region]||'')+' '+p.region+' · '+(p.owner||'—')+' · '+LBL[p.status];
+  document.getElementById('di').value=(upds[id+'_'+tod()]||{}).text||'';
+  renderHist(id);renderCmts(id);
+  document.getElementById('sb-bg').classList.add('open');document.getElementById('sb').classList.add('open');
+}
+function closeSB(){document.getElementById('sb-bg').classList.remove('open');document.getElementById('sb').classList.remove('open');activeId=null;}
+function renderHist(id){
+  const h=(hist[id]||[]);
+  document.getElementById('hist').innerHTML=h.length
+    ?h.slice().reverse().map(x=>`<div class="hist-item">${fts(x.ts)} — <span class="badge ${x.from}">${LBL[x.from]}</span> → <span class="badge ${x.to}">${LBL[x.to]}</span></div>`).join('')
+    :`<p style="font-size:10px;color:var(--t3)">No status changes yet.</p>`;
+}
+function renderCmts(id){
+  const cs=(cmts[id]||[]);
+  document.getElementById('cmts').innerHTML=cs.length
+    ?cs.slice().reverse().map(c=>`<div class="cmt-item"><div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">${av(c.name)}<strong style="font-size:12px">${e(c.name)}</strong><span style="font-size:9px;color:var(--t3)">${fts(c.ts)}</span></div><div style="font-size:11px;line-height:1.6;color:var(--t2)">${e(c.text)}</div></div>`).join('')
+    :`<p style="font-size:11px;color:var(--t3)">No comments yet.</p>`;
+}
+function saveUpdate(){const txt=document.getElementById('di').value.trim();if(!txt)return;upds[activeId+'_'+tod()]={text:txt,ts:Date.now()};sv();renderAll();toast('Update saved');}
+function postCmt(){
+  const nm=document.getElementById('ni').value.trim();const tx=document.getElementById('ci').value.trim();
+  if(!nm||!tx){alert('Please enter your name and a comment.');return;}
+  if(!cmts[activeId])cmts[activeId]=[];
+  cmts[activeId].push({name:nm,text:tx,ts:Date.now()});
+  sv();document.getElementById('ci').value='';renderCmts(activeId);renderAll();toast('Comment posted','info');
+}
+function openAdd(){['a-task','a-owner','a-tl','a-upd'].forEach(id=>document.getElementById(id).value='');document.getElementById('a-status').value='on-track';document.getElementById('add-modal').classList.add('open');}
+function closeAdd(){document.getElementById('add-modal').classList.remove('open');}
+function saveAdd(){
+  const task=document.getElementById('a-task').value.trim();if(!task){alert('Task name is required.');return;}
+  tasks.push({id:'t'+(nid++),region:document.getElementById('a-region').value,task,owner:document.getElementById('a-owner').value.trim(),status:document.getElementById('a-status').value,timeline:document.getElementById('a-tl').value.trim(),update:document.getElementById('a-upd').value.trim()});
+  sv();closeAdd();buildTabs();renderAll();toast('Task added');
+}
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){closeSB();closeAdd();closeCal();}});
+loadData();
+</script>
+</body>
+</html>
